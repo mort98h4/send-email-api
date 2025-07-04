@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node api/sendMessage.js",
-    "build": "echo 'No build needed'"
+    "dev": "node api/sendEmail.js"
   },
   "keywords": [],
   "author": "",
