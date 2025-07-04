@@ -1,14 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "api/sendMessage.js": {
-      "runtime": "nodejs22.x"
-    }
-  },
   "routes": [
     {
-      "src": "/api/sendMessage",
-      "dest": "api/sendMessage.js"
+      "src": "/api/sendEmail",
+      "dest": "api/sendEmail.js"
     }
   ]
 }
