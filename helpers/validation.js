@@ -47,12 +47,12 @@ export function missingValues(fields, requestBody) {
     for (let i = 0; i < fields.length; i++) {
         const element = fields[i];
 
-        if (requiredFields.find(x => x === element) && (!requestBody[element] || !requestBody[element].trim())) {
+        if (requiredFields.find(x => x === element) && (!requestBody[element] || !requestBody[element][0].trim())) {
             fieldsWithMissingValues.push(element);
         }
     }
 
-    if (fieldsWithMissingValues.length > 0) return [fieldsWithMissingValues, 'Missing value(s).'];
+    if (fieldsWithMissingValues.length > 0) return [fieldsWithMissingValues, {message: 'Missing value(s).', type: 'value_missing'}];
 
     return [null, null];
 }
@@ -64,7 +64,7 @@ export function fullname(value) {
 export function email(value) {
     value = value.trim();
 
-    if (!emailRegex.test(value)) return [null, `'${value}' is not a valid email address.`];
+    if (!emailRegex.test(value)) return [null, { message: `'${value}' is not a valid email address.`, type: 'invalid_email' }];
 
     return [value, null];
 }
@@ -73,7 +73,7 @@ export function phone(value) {
     value = value.trim();
 
     if (value === '') return [value, null];
-    if (!phoneRegex.test(value)) return [null, `'${value}' is not a valid danish phone number.`];
+    if (!phoneRegex.test(value)) return [null, { message: `'${value}' is not a valid danish phone number.`, type: 'invalid_phone_number' }];
 
     return [value, null];
 }
@@ -85,8 +85,8 @@ export function message(value) {
 function validateStringLength(field, value, min, max) {
     value = value.trim();
 
-    if (value.length < min) return [null, `'${field}' should have min. ${min} characters.`];
-    if (value.length > max) return [null, `'${field}' should have max. ${max} characters.`];
+    if (value.length < min) return [null, { message: `'${field}' should have min. ${min} characters.`, type: 'too_small' }];
+    if (value.length > max) return [null, { message: `'${field}' should have max. ${max} characters.`, type: 'too_big' }];
 
     return [value, null]
 }
