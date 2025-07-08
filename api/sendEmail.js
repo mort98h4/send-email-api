@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import * as validate from '../helpers/validation.js';
+import { htmlTemp } from '../helpers/htmlTemplate.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -11,45 +12,62 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
+    if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ error: 'Invalid or missing body' });
+    }
+
     try {
         const fields = Object.keys(req.body);
         let invalidFields;
-        let error;
+        let inputError;
 
-        [invalidFields, error] = validate.missingFields(fields);
-        if (error) return res.status(400).json({ error: error, fields: invalidFields });
+        [invalidFields, inputError] = validate.missingFields(fields);
+        if (inputError) return res.status(400).json({ error: inputError, fields: invalidFields });
 
-        [invalidFields, error] = validate.disallowedFields(fields);
-        if (error) return res.status(400).json({ error: error, fields: invalidFields });
+        [invalidFields, inputError] = validate.disallowedFields(fields);
+        if (inputError) return res.status(400).json({ error: inputError, fields: invalidFields });
 
-        [invalidFields, error] = validate.missingValues(fields, req.body);
-        if (error) return res.status(400).json({ error: error, fields: invalidFields });
+        [invalidFields, inputError] = validate.missingValues(fields, req.body);
+        if (inputError) return res.status(400).json({ error: inputError, fields: invalidFields });
 
         
         let { fullname, email, phone, message } = req.body;
         
 
-        [fullname, error] = validate.fullname(fullname);
-        if (error) return res.status(400).json({ error: error, fields: ['fullname'] });
+        [fullname, inputError] = validate.fullname(fullname);
+        if (inputError) return res.status(400).json({ error: inputError, fields: ['fullname'] });
 
-        [email, error] = validate.email(email);
-        if (error) return res.status(400).json({ error: error, fields: ['email']});
+        [email, inputError] = validate.email(email);
+        if (inputError) return res.status(400).json({ error: inputError, fields: ['email']});
 
-        [phone, error] = validate.phone(phone);
-        if (error) return res.status(400).json({ error: error, fields: ['phone'] });
+        [phone, inputError] = validate.phone(phone);
+        if (inputError) return res.status(400).json({ error: inputError, fields: ['phone'] });
 
-        [message, error] = validate.message(message);
-        if (error) return res.status(400).json({ error: error, fields: ['message'] });
+        [message, inputError] = validate.message(message);
+        if (inputError) return res.status(400).json({ error: inputError, fields: ['message'] });
 
-        let data = {};
-        data.fullname = fullname;
-        data.email = email;
-        data.phone = phone;
-        data.message = message;
+        const html = htmlTemp
+                    .replaceAll('%FULLNAME%', fullname)
+                    .replace('%MESSAGE%', message)
+                    .replace('%EMAIL%', email)
+                    .replace('%PHONE%', phone);
         
-        return res.status(200).json({ message: 'Message was successfully sent!', data: data });
+        const { data, error } = await resend.emails.send({
+            // from: 'Morten Gross <no-reply@mortengross.dk>',
+            from: 'this@will-not-work.com',
+            to: ['mortengross_93@hotmail.com'],
+            subject:  `New message from ${fullname}`,
+            html: html
+        });
+
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'An error happened from Resend.' });
+        }
+        
+        return res.status(200).json({ message: 'Message was successfully sent!' });
     } catch (error) {
-        console.error('Serverfejl:', error);
+        console.error('Serverfejl:\n', error);
         return res.status(500).json({ error: 'Server error' });
     }
 }
