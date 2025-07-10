@@ -1,3 +1,5 @@
+import {decrypt} from './encryption.js';
+
 const requiredFields = ['fullname', 'email', 'message'];
 const allowedFields = ['fullname', 'email', 'phone', 'message'];
 
@@ -8,6 +10,18 @@ const messageMax = 500;
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const phoneRegex = /^(?:\+45\s?)?(?:\d{2}\s?\d{2}\s?\d{2}\s?\d{2})$/;
+
+export function apiKey(key) {
+    const error = { status: 401, message: 'Unauthorized.' };
+
+    if (key === undefined) return error;
+
+    const [decryptedKey, decryptionError] = decrypt(key);
+    if (decryptionError) return decryptionError;
+    if (decryptedKey !== process.env.API_KEY) return error;
+
+    return null;
+}
 
 export function missingFields(fields) {
     const missingFields = [];

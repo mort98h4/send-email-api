@@ -16,6 +16,11 @@ export const config = {
  * Vercel Serverless Function til at sende en mail via Resend
  */
 async function handler(req, res) {
+    const apiKeyError = validate.apiKey(req.headers['x-api-key']);
+    if (apiKeyError) {
+        return res.status(apiKeyError.status).json({ error: apiKeyError.message });
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
