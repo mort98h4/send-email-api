@@ -2,7 +2,7 @@ export default function withCors(handler, options = {}) {
     const {
         origin = process.env.ALLOW_ORIGIN,
         methods = 'POST,OPTIONS',
-        headers = 'Content-Type',
+        headers = 'Content-Type,x-api-key',
     } = options;
 
     return async function corsHandler(req, res) {
