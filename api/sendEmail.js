@@ -48,7 +48,7 @@ async function handler(req, res) {
             if (inputError) return res.status(400).json({ inputError: inputError, fields: invalidFields });
 
             [invalidFields, inputError] = validate.disallowedFields(fieldKeys);
-            if (inputError) return res.status(400).json({ inputError: inputError, fields: invalidFields });
+            if (inputError) return res.status(400).json({ error: inputError, fields: invalidFields });
 
             [invalidFields, inputError] = validate.missingValues(fieldKeys, fields);
             if (inputError) return res.status(400).json({ inputError: inputError, fields: invalidFields });
